@@ -2,13 +2,17 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.authentication.auth import get_current_active_user, token_manager
+from src.authentication.auth import (AdminRoleChecker, get_current_active_user,
+                                     token_manager)
 from src.database.db import get_session
 
-from .schema import UserResponse, UserSchema, UserUpdateSchema
-from .services import UserService
+from .schema import (RoleResponse, RoleSchema, UserResponse, UserRoleSchema,
+                     UserSchema, UserUpdateSchema)
+from .services import RoleService, UserService
 
 user_module_router = APIRouter(prefix="/users", tags=["User Management"])
+
+admin_role = AdminRoleChecker()
 
 
 @user_module_router.post(
@@ -31,7 +35,9 @@ async def create_new_user(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
-@user_module_router.get("/profile", response_model=UserResponse)
+@user_module_router.get(
+    "/profile", response_model=UserResponse, dependencies=[Depends(admin_role)]
+)
 async def retrieve_user_by_token(
     current_active_user: UserResponse = Depends(get_current_active_user),
 ):
@@ -103,3 +109,49 @@ async def delete_user(
         content={"message": "User deleted successfully", "status": "success"},
         status_code=status.HTTP_204_NO_CONTENT,
     )
+
+
+@user_module_router.post(
+    "/roles", response_model=RoleResponse, dependencies=[Depends(admin_role)]
+)
+async def create_new_role(
+    role_payload: RoleSchema,
+    session: AsyncSession = Depends(get_session),
+    role_service: RoleService = Depends(RoleService),
+    current_active_user: UserResponse = Depends(get_current_active_user),
+):
+
+    try:
+        role_response = await role_service.create_new_role(role_payload, session)
+        if not role_response:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Role not created"
+            )
+        return role_response
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@user_module_router.patch(
+    "/assign-user-role/",
+    response_model=UserResponse,
+    dependencies=[Depends(admin_role)],
+)
+async def assign_user_role(
+    user_role_payload: UserRoleSchema,
+    session: AsyncSession = Depends(get_session),
+    user_service: UserService = Depends(UserService),
+    current_active_user: UserResponse = Depends(get_current_active_user),
+) -> UserResponse:
+
+    try:
+        user_response = await user_service.assign_role_to_use(
+            user_role_payload, session
+        )
+        if not user_response:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="User role not assigned"
+            )
+        return user_response
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

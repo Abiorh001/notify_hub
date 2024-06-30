@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,7 +13,6 @@ from .schema import (UserLoginResponse, UserLoginSchema,
                      UserRefreshAccessTokenSchema)
 
 
-@dataclass
 class AuthenticationService:
     async def login_user(
         self, user_login_schema: UserLoginSchema, session: AsyncSession
@@ -35,6 +33,7 @@ class AuthenticationService:
             first_name=user.first_name,
             last_name=user.last_name,
             is_active=user.is_active,
+            role_uid=user.role_uid,
             access_token=access_token,
             refresh_token=refresh_token,
             token_type="bearer",

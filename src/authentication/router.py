@@ -37,7 +37,6 @@ async def login_user(
 async def refresh_access_token(
     refresh_token_payload: UserRefreshAccessTokenSchema,
     auth_service: AuthenticationService = Depends(AuthenticationService),
-    token_manager: dict = Depends(token_manager),
 ) -> Optional[UserRefreshAccessTokenResponse]:
     try:
         new_access_token = await auth_service.generate_new_access_token(
