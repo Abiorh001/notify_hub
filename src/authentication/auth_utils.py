@@ -152,7 +152,4 @@ async def is_token_blacklisted(jti: str) -> bool:
     """
     redis = await redis_connection()
     is_blacklisted = await redis.get(jti)
-    if is_blacklisted:
-        await redis.close()
-        return True
-    return False
+    return is_blacklisted is not None

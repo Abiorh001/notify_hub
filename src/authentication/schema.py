@@ -22,6 +22,7 @@ class UserResponse(BaseModel):
     first_name: str
     last_name: str
     is_active: bool
+    role_uid: UUID
 
 
 class UserLoginResponse(BaseModel):

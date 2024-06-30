@@ -1,5 +1,5 @@
-from dataclasses import dataclass
 from typing import Optional
+from uuid import UUID
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,11 +7,54 @@ from sqlmodel import select
 
 from src.authentication.auth_utils import get_password_hash, verify_password
 
-from .model import User
-from .schema import UserResponse, UserSchema, UserUpdateSchema
+from .model import Role, User
+from .schema import (RoleResponse, RoleSchema, UserResponse, UserRoleSchema,
+                     UserSchema, UserUpdateSchema)
 
 
-@dataclass
+class RoleService:
+    async def create_new_role(
+        self, role_schema: RoleSchema, session: AsyncSession
+    ) -> Optional[RoleResponse]:
+        try:
+
+            role_schema = role_schema.model_dump()
+            new_role = Role(**role_schema)
+            session.add(new_role)
+            await session.commit()
+            await session.refresh(new_role)
+            role_response = RoleResponse(
+                uid=new_role.uid,
+                role=new_role.role,
+                description=new_role.description,
+                permissions=new_role.permissions,
+            )
+            return role_response
+        except IntegrityError as e:
+            await session.rollback()
+            raise e.orig
+        except Exception as e:
+            await session.rollback()
+            raise e
+
+    async def retrieve_role_by_uuid(
+        self, role_uid: str, session: AsyncSession
+    ) -> Optional[RoleResponse]:
+        role = await session.get(Role, role_uid)
+        if not role:
+            return None
+        role_response = RoleResponse(
+            uid=role.uid,
+            role=role.role,
+            description=role.description,
+            permissions=role.permissions,
+        )
+        return role_response
+
+
+role_service = RoleService()
+
+
 class UserService:
     """
     Service class for user-related operations such as creating, retrieving, and searching users.
@@ -47,6 +90,7 @@ class UserService:
                 last_name=new_user.last_name,
                 email=new_user.email,
                 is_active=new_user.is_active,
+                role_uid=new_user.role_uid,
             )
             return user_response
         except IntegrityError as e:
@@ -78,6 +122,7 @@ class UserService:
             last_name=user.last_name,
             email=user.email,
             is_active=user.is_active,
+            role_uid=user.role_uid,
         )
         return user_response
 
@@ -104,6 +149,7 @@ class UserService:
                 last_name=user.last_name,
                 email=user.email,
                 is_active=user.is_active,
+                role_uid=user.role_uid,
             )
             return user_response
         return None
@@ -149,6 +195,7 @@ class UserService:
                 last_name=user.last_name,
                 email=user.email,
                 is_active=user.is_active,
+                role_uid=user.role_uid,
             )
             return user_response
         except IntegrityError as e:
@@ -186,11 +233,36 @@ class UserService:
                 last_name=user.last_name,
                 email=user.email,
                 is_active=user.is_active,
+                role_uid=user.role_uid,
             )
             return user_response
         except Exception as e:
             await session.rollback()
             raise e
+
+    async def assign_role_to_use(
+        self, user_role_schema: UserRoleSchema, session: AsyncSession
+    ) -> Optional[UserResponse]:
+        role = await role_service.retrieve_role_by_uuid(
+            user_role_schema.role_uid, session
+        )
+        if not role:
+            return None
+        user = await session.get(User, user_role_schema.user_uid)
+        if not user:
+            return None
+        user.role_uid = role.uid
+        await session.commit()
+        await session.refresh(user)
+        user_response = UserResponse(
+            uid=user.uid,
+            first_name=user.first_name,
+            last_name=user.last_name,
+            email=user.email,
+            is_active=user.is_active,
+            role_uid=user.role_uid,
+        )
+        return user_response
 
 
 user_service = UserService()

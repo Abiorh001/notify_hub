@@ -26,6 +26,7 @@ class UserResponse(BaseModel):
     first_name: str
     last_name: str
     is_active: bool
+    role_uid: Optional[UUID]
 
 
 class UserUpdateSchema(BaseModel):
@@ -41,3 +42,27 @@ class UserUpdateSchema(BaseModel):
 
     class Config:
         extra = "forbid"
+
+
+class UserRoleSchema(BaseModel):
+    role_uid: UUID
+    user_uid: UUID
+
+    class Config:
+        extra = "forbid"
+
+
+class RoleSchema(BaseModel):
+    role: str = Field(..., min_length=2, max_length=100)
+    permissions: list[str]
+    description: str = Field(..., min_length=2, max_length=200)
+
+    class Config:
+        extra = "forbid"
+
+
+class RoleResponse(BaseModel):
+    uid: UUID
+    role: str
+    permissions: list[str]
+    description: str
