@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import List, Optional
+
+from typing import Optional
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer
@@ -13,7 +13,7 @@ from src.user_module.services import role_service, user_service
 security = HTTPBearer()
 
 
-async def token_manager(token: str = Depends(security)) -> Optional[dict]:
+async def token_manager_func(token: str = Depends(security)) -> Optional[dict]:
     """
     Validate and decode the JWT token to extract the payload.
 
@@ -31,7 +31,7 @@ async def token_manager(token: str = Depends(security)) -> Optional[dict]:
         decode_token_payload = decode_access_token(token)
         if not decode_token_payload:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, detail="Invalid token"
+                status_code=status.HTTP_403_FORBIDDEN, detail="Invalid or expired token"
             )
         if decode_token_payload.get("refresh"):
             raise HTTPException(
@@ -45,11 +45,11 @@ async def token_manager(token: str = Depends(security)) -> Optional[dict]:
 
         return decode_token_payload
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e)) from e
 
 
 async def get_current_active_user(
-    token_manager: dict = Depends(token_manager),
+    token_manager: dict = Depends(token_manager_func),
     session: AsyncSession = Depends(get_session),
 ) -> Optional[dict]:
     """
@@ -81,7 +81,7 @@ async def get_current_active_user(
             )
         return user
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
 
 
 class AdminRoleChecker:

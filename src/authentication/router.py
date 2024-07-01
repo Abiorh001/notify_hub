@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.db import get_session
 
-from .auth import token_manager
+from .auth import token_manager_func
 from .schema import (UserLoginResponse, UserLoginSchema,
                      UserRefreshAccessTokenResponse,
                      UserRefreshAccessTokenSchema)
@@ -48,13 +48,13 @@ async def refresh_access_token(
             )
         return new_access_token
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
 
 
 @auth_router.post("/logout/", status_code=status.HTTP_200_OK)
 async def log_out_user(
     auth_service: AuthenticationService = Depends(AuthenticationService),
-    token_manager: dict = Depends(token_manager),
+    token_manager: dict = Depends(token_manager_func),
 ) -> JSONResponse:
     try:
         jti = token_manager.get("jti")
@@ -75,4 +75,4 @@ async def log_out_user(
             status_code=status.HTTP_200_OK,
         )
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e

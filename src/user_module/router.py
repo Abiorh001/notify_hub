@@ -2,8 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.authentication.auth import (AdminRoleChecker, get_current_active_user,
-                                     token_manager)
+from src.authentication.auth import (AdminRoleChecker, get_current_active_user)
 from src.database.db import get_session
 
 from .schema import (RoleResponse, RoleSchema, UserResponse, UserRoleSchema,
@@ -32,11 +31,11 @@ async def create_new_user(
             )
         return user_response
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
 
 
 @user_module_router.get(
-    "/profile", response_model=UserResponse, dependencies=[Depends(admin_role)]
+    "/profile", response_model=UserResponse, status_code=status.HTTP_200_OK
 )
 async def retrieve_user_by_token(
     current_active_user: UserResponse = Depends(get_current_active_user),
@@ -50,7 +49,7 @@ async def retrieve_user_by_token(
             )
         return user_response
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
 
 
 @user_module_router.get("/", response_model=UserResponse)
@@ -58,7 +57,7 @@ async def retrieve_user_by_email(
     email: str,
     session: AsyncSession = Depends(get_session),
     user_service: UserService = Depends(UserService),
-    current_active_user: UserResponse = Depends(get_current_active_user),
+    current_active_user: UserResponse = Depends(get_current_active_user)  # pylint: disable=unused-argument
 ):
 
     user_response = await user_service.get_user_by_email(email, session)
@@ -90,7 +89,7 @@ async def update_user(
             )
         return user_response
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
 
 
 @user_module_router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
@@ -104,7 +103,7 @@ async def delete_user(
         user_uid = current_active_user.uid
         await user_service.delete_user(user_uid, session)
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
     return JSONResponse(
         content={"message": "User deleted successfully", "status": "success"},
         status_code=status.HTTP_204_NO_CONTENT,
@@ -118,7 +117,7 @@ async def create_new_role(
     role_payload: RoleSchema,
     session: AsyncSession = Depends(get_session),
     role_service: RoleService = Depends(RoleService),
-    current_active_user: UserResponse = Depends(get_current_active_user),
+    current_active_user: UserResponse = Depends(get_current_active_user),  # pylint: disable=unused-argument
 ):
 
     try:
@@ -129,7 +128,7 @@ async def create_new_role(
             )
         return role_response
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
 
 
 @user_module_router.patch(
@@ -141,7 +140,7 @@ async def assign_user_role(
     user_role_payload: UserRoleSchema,
     session: AsyncSession = Depends(get_session),
     user_service: UserService = Depends(UserService),
-    current_active_user: UserResponse = Depends(get_current_active_user),
+    current_active_user: UserResponse = Depends(get_current_active_user),  # pylint: disable=unused-argument
 ) -> UserResponse:
 
     try:
@@ -154,4 +153,4 @@ async def assign_user_role(
             )
         return user_response
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
