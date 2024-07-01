@@ -1,4 +1,3 @@
-
 from typing import Optional
 
 from fastapi import Depends, HTTPException, status
@@ -81,7 +80,9 @@ async def get_current_active_user(
             )
         return user
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        ) from e
 
 
 class AdminRoleChecker:

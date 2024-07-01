@@ -48,7 +48,9 @@ async def refresh_access_token(
             )
         return new_access_token
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        ) from e
 
 
 @auth_router.post("/logout/", status_code=status.HTTP_200_OK)
@@ -75,4 +77,6 @@ async def log_out_user(
             status_code=status.HTTP_200_OK,
         )
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        ) from e
