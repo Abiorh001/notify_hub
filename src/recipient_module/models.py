@@ -1,0 +1,20 @@
+from uuid import UUID, uuid4
+
+import sqlalchemy.dialects.postgresql as pg
+from sqlmodel import Column, Field, SQLModel
+
+
+class Recipient(SQLModel, table=True):
+    __tablename__ = "recipeints"
+
+    uid: UUID = Field(
+        sa_column=Column(pg.UUID, primary_key=True, default=lambda: uuid4(), index=True)
+    )
+    first_name: str = Field(max_length=100)
+    last_name: str = Field(max_length=100)
+    email: str = Field(max_length=100)
+    phone_number: str = Field(max_length=30)
+    created_by: UUID = Field(sa_column=Column(pg.UUID))
+
+    def __str__(self):
+        return self.uid
