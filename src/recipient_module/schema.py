@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from pydantic import BaseModel, Field
+from typing import Optional
 
 
 class RecipientSchema(BaseModel):
@@ -16,9 +17,9 @@ class RecipientSchema(BaseModel):
 class RecipientResponse(BaseModel):
     uid: UUID
     first_name: str
-    last_name: str
-    email: str
-    phone_number: str
+    last_name: Optional[str]
+    email: Optional[str]
+    phone_number: Optional[str]
     created_by: UUID
 
 
