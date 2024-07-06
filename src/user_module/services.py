@@ -7,8 +7,14 @@ from sqlmodel import select
 from src.authentication.auth_utils import get_password_hash, verify_password
 
 from .model import Role, User
-from .schema import (RoleResponse, RoleSchema, UserResponse, UserRoleSchema,
-                     UserSchema, UserUpdateSchema)
+from .schema import (
+    RoleResponse,
+    RoleSchema,
+    UserResponse,
+    UserRoleSchema,
+    UserSchema,
+    UserUpdateSchema,
+)
 
 
 class RoleService:

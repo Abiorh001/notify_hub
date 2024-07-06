@@ -4,8 +4,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.authentication.auth_utils import (decode_access_token,
-                                           is_token_blacklisted)
+from src.authentication.auth_utils import decode_access_token, is_token_blacklisted
 from src.database.db import get_session
 from src.user_module.services import role_service, user_service
 

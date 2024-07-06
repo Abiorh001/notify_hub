@@ -7,9 +7,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.database.db import get_session
 
 from .auth import token_manager_func
-from .schema import (UserLoginResponse, UserLoginSchema,
-                     UserRefreshAccessTokenResponse,
-                     UserRefreshAccessTokenSchema)
+from .schema import (
+    UserLoginResponse,
+    UserLoginSchema,
+    UserRefreshAccessTokenResponse,
+    UserRefreshAccessTokenSchema,
+)
 from .service import AuthenticationService
 
 auth_router = APIRouter(prefix="/auth", tags=["authentication"])

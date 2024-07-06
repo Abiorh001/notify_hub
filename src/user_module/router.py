@@ -5,8 +5,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.authentication.auth import AdminRoleChecker, get_current_active_user
 from src.database.db import get_session
 
-from .schema import (RoleResponse, RoleSchema, UserResponse, UserRoleSchema,
-                     UserSchema, UserUpdateSchema)
+from .schema import (
+    RoleResponse,
+    RoleSchema,
+    UserResponse,
+    UserRoleSchema,
+    UserSchema,
+    UserUpdateSchema,
+)
 from .services import RoleService, UserService
 
 user_module_router = APIRouter(prefix="/users", tags=["User Management"])
