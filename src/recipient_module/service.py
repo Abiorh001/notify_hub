@@ -1,9 +1,11 @@
-from .schema import RecipientSchema, RecipientUpdateSchema, RecipientResponse
-from .models import Recipient
+from typing import List, Optional
+from uuid import UUID
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
-from typing import Optional, List
-from uuid import UUID
+
+from .models import Recipient
+from .schema import RecipientResponse, RecipientSchema, RecipientUpdateSchema
 
 
 class RecipientService:
@@ -57,10 +59,10 @@ class RecipientService:
             statement = select(Recipient).where(Recipient.created_by == created_by)
             result = await session.execute(statement)
             recipients = result.scalars().all()
-        
+
             if not recipients:
                 return []
-            
+
             recipient_responses = [
                 RecipientResponse(
                     uid=recipient.uid,
@@ -73,7 +75,51 @@ class RecipientService:
                 for recipient in recipients
             ]
             return recipient_responses
-        
+
+        except Exception as e:
+            await session.rollback()
+            raise e
+
+    async def update_recipient(
+        self,
+        recipient_uid: str,
+        recipient_schema: RecipientUpdateSchema,
+        session: AsyncSession,
+    ) -> Optional[RecipientResponse]:
+        try:
+            update_recipient_dict = recipient_schema.model_dump()
+            recipient = await session.get(Recipient, recipient_uid)
+            if not recipient:
+                return None
+            for attribute, value in update_recipient_dict.items():
+                if value is not None:
+                    setattr(recipient, attribute, value)
+
+            await session.commit()
+            await session.refresh(recipient)
+            recipient_response = RecipientResponse(
+                uid=recipient.uid,
+                first_name=recipient.first_name,
+                last_name=recipient.last_name,
+                email=recipient.email,
+                phone_number=recipient.phone_number,
+                created_by=recipient.created_by,
+            )
+            return recipient_response
+        except Exception as e:
+            await session.rollback()
+            raise e
+
+    async def delete_recipient(
+        self, recipient_uid: str, session: AsyncSession
+    ) -> Optional[bool]:
+        try:
+            recipient = await session.get(Recipient, recipient_uid)
+            if not recipient:
+                return None
+            await session.delete(recipient)
+            await session.commit()
+            return True
         except Exception as e:
             await session.rollback()
             raise e

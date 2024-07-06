@@ -4,8 +4,8 @@ from fastapi import FastAPI
 
 from src.authentication.router import auth_router
 from src.database.db import db_init
-from src.user_module.router import user_module_router
 from src.recipient_module.router import recipient_router
+from src.user_module.router import user_module_router
 
 
 @asynccontextmanager

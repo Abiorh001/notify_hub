@@ -5,19 +5,12 @@ from sqlmodel import select
 
 from src.user_module.model import User
 
-from .auth_utils import (
-    blacklist_token_jti,
-    create_access_token,
-    create_refresh_token,
-    refresh_access_token,
-    verify_password,
-)
-from .schema import (
-    UserLoginResponse,
-    UserLoginSchema,
-    UserRefreshAccessTokenResponse,
-    UserRefreshAccessTokenSchema,
-)
+from .auth_utils import (blacklist_token_jti, create_access_token,
+                         create_refresh_token, refresh_access_token,
+                         verify_password)
+from .schema import (UserLoginResponse, UserLoginSchema,
+                     UserRefreshAccessTokenResponse,
+                     UserRefreshAccessTokenSchema)
 
 
 class AuthenticationService:

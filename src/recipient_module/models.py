@@ -1,6 +1,7 @@
-from sqlmodel import SQLModel, Field, Column
 from uuid import UUID, uuid4
+
 import sqlalchemy.dialects.postgresql as pg
+from sqlmodel import Column, Field, SQLModel
 
 
 class Recipient(SQLModel, table=True):
